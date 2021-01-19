@@ -97,6 +97,43 @@ void mchns::compare(mchns object)
 	if (Wt == object.Wt) { cout << "Выходная мощность (мВт): " << endl << Wt << "   совпадает   " << object.Wt << endl; }
 	else { cout << "Выходная мощность (мВт): " << endl << Wt << "   не совпадает   " << object.Wt << endl << endl; }
 }
+struct Node // линейный список
+{
+	mchns data;
+	Node* Next, * Prev;
+};
+
+class List
+{
+	Node* Head, * Tail;
+public:
+	List() : Head(NULL), Tail(NULL) {};
+	~List() {
+		while (Head)
+		{
+			Tail = Head->Next;
+			delete Head;
+			Head = Tail;
+		}
+	}
+	void Add(mchns& data) {
+		Node* temp = new Node;
+		temp->Next = NULL;
+		temp->data = data;
+
+		if (Head != NULL)
+		{
+			temp->Prev = Tail;
+			Tail->Next = temp;
+			Tail = temp;
+		}
+		else
+		{
+			temp->Prev = NULL;
+			Head = Tail = temp;
+		}
+	}
+};
 int main()
 {
 	setlocale(LC_ALL, "Rus");
@@ -116,6 +153,9 @@ int main()
 
 	l1.print();
 	l2.print();
+	List list_mchns;
+	list_mchns.Add(l3);
+	list_mchns.Add(l4);
 	system("pause");
 	return 0;
 }

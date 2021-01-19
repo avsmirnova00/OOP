@@ -8,18 +8,21 @@ class mchns
 public:
 	mchns<T>(); // констр-р по умолч-ю
 	mchns<T>(const mchns<T>&); // копирующий констр-р
-	mchns<T>(char* name, char* color, int Rzm, int Un, int Wt); // конструктор с параметрами
+	mchns<T>(char* name, char* color, int Rzm, int Un, int Wt, int price); // конструктор с параметрами
 	~mchns<T>(); // деструктор
 	void print() const; // селектор
 	mchns<T>& operator = (const mchns<T>& object); // присваивание
 	bool& operator == (mchns<T>& object); // сравнение
+	friend std::ostream& operator<< (std::ostream& out, const mchns<T>& object);
+		int Get_price()const;
 private:
 	// интерфейсная часть класса
-	T float Rzm; // размер
-	T float Un; // напряжение
+	float Rzm; // размер
+	float Un; // напряжение
 	int Wt; // мощность (мВт)
 	char* name; // наименование
 	char* color; // цвет
+	int price;
 
 };
 template <class T>
@@ -32,17 +35,19 @@ mchns<T>::mchns()
 	Rzm = 0;
 	Un = 0;
 	Wt = 0;
+	price = 0;
 }
 template <class T>
-mchns<T>::mchns(char* n, char* clr, int r, int u, int w)
+mchns<T>::mchns(char* n, char* clr, int r, int u, int w, int p)
 {
 	name = new char[strlen(n) + 1];
-	strcpy(name, n);
+	strcpy((char*)name, n);
 	color = new char[strlen(clr) + 1];
-	strcpy(color, clr);
+	strcpy((char*)color, clr);
 	Rzm = r;
 	Un = u;
 	Wt = w;
+	price = p;
 }
 template <class T>
 mchns <T>::mchns(const mchns<T>& object)
@@ -50,12 +55,14 @@ mchns <T>::mchns(const mchns<T>& object)
 	/*delete[] name;
 	delete[] color;*/
 	name = new char[strlen(object.name) + 1];
-	strcpy(name, object.name);
+	strcpy_s(name, object.name);
 	color = new char[strlen(object.color) + 1];
-	strcpy(color, object.color);
+	strcpy_s(color, object.color);
 	Rzm = object.Rzm;
 	Un = object.Un;
 	Wt = object.Wt;
+	price = object.price;
+
 }
 template <class T>
 void mchns<T>::print()const
@@ -64,7 +71,8 @@ void mchns<T>::print()const
 		<< "Цвет машины: " << color << endl
 		<< "Размер: " << Rzm << endl
 		<< "Напряжение: " << Un << endl
-		<< "Мощность (мВт): " << Wt << endl << endl;
+		<< "Мощность (мВт): " << Wt << endl 
+		<< "Цена: " << price << endl << endl;
 }
 template <class T>
 mchns<T>::~mchns()
@@ -86,6 +94,7 @@ mchns<T>& mchns<T>:: operator =(const mchns<T>& object)
 		Rzm = object.Rzm;
 		Un = object.Un;
 		Wt = object.Wt;
+		price = object.price;
 	}
 	return (*this);
 }
@@ -128,17 +137,118 @@ bool& mchns<T>::operator == (mchns<T>& object)
 	else {
 		cout << "Выходная мощность (мВт): " << endl << Wt << " не совпадает " << object.Wt << endl << endl; flag = false;
 	}
+	if (price == object.price) {
+		cout << "Цена: " << endl << price << " совпадает " << object.price << endl; flag = true;
+	}
+	else {
+		cout << "Цена: " << endl << price << " не совпадает " << object.price << endl << endl; flag = false;
+	}
+	return flag; 
 }
+std::ostream& operator<< (std::ostream& out, const mchns<class T>& object) {
+	out << "Наименование:" << object.name << endl;
+	out << "Цвет:" << object.color << endl;
+	out << "Цена:" << object.price << endl;
+	out << "Напряжение:" << object.Un << endl;
+	out << "Мощность:" << object.Wt << endl;
+	out << "Размер:" << object.Rzm << endl;
+	out << endl;
+	return out;
+}
+int mchns<class T>::Get_price()const {
+	return price;
+}
+struct Node // линейный список
+{
+	mchns<T> data;
+	Node* Next, * Prev;
+};
+template <class T>
+class List
+{
+	Node* Head, * Tail;
+public:
+	List() : Head(NULL), Tail(NULL) {};
+	~List() {
+		while (Head)
+		{
+			Tail = Head->Next;
+			delete Head;
+			Head = Tail;
+		}
+	}
+	void Show() {
+		Node* temp = Head;
+		while (temp != NULL)
+		{
+			cout << temp->data;
+			temp = temp->Next;
+		}
+	}
+	void Add(mchns<T> & data) {
+		Node* temp = new Node;
+		temp->Next = NULL;
+		temp->data = data;
+
+		if (Head != NULL)
+		{
+			temp->Prev = Tail;
+			Tail->Next = temp;
+			Tail = temp;
+		}
+		else
+		{
+			temp->Prev = NULL;
+			Head = Tail = temp;
+		}
+	}
+	void sort() {
+		Node* tmp = Head;
+		int size = 0;
+		while (tmp != NULL) {
+			size++;
+			tmp = tmp->Next;
+		}
+		mchns<class T>* arr = new mchns<T>[size];
+		int a = 0;
+		tmp = Head;
+		while (tmp != NULL) {
+			arr[a] = tmp->data;
+			tmp = tmp->Next;
+			a++;
+		}
+		for (int i = 0; i < size - 1; i++) {
+			for (int j = i + 1; j < size; j++) {
+				if (arr[i].Get_price() < arr[j].Get_price()) {
+					mchns<T> tmp;
+					tmp = arr[i];
+					arr[i] = arr[j];
+					arr[j] = tmp;
+				}
+			}
+		}
+		tmp = Head;
+		while (tmp != NULL) {
+			Head = Head->Next;
+			delete(tmp);
+			tmp = Head;
+		}
+		for (int i = 0; i < size; i++) {
+			Add(arr[i]);
+		}
+	}
+};
+
 int main()
 {
 	setlocale(LC_ALL, "Rus");
-	mchns <float> l1((char*)"С/Х машина", (char*)"жёлтый", 10.5, 40.8, 220);
-	mchns <float> l2((char*)"С/Х машина", (char*)"зеленый", 15, 50, 220);
+	mchns <float> l1((char*)"С/Х машина", (char*)"жёлтый", 10, 40, 100, 220);
+	mchns <float> l2((char*)"С/Х машина", (char*)"зеленый", 15, 50, 100, 220);
 	mchns <float> l3(l1);
 	mchns <float> l4;
 
-	mchns <int> l5((char*)"С/Х машина", (char*)"жёлтый", 10.5, 40.8, 220);
-	mchns <int> l6((char*)"С/Х машина", (char*)"зеленый", 15, 50, 220);
+	mchns <int> l5((char*)"С/Х машина", (char*)"жёлтый", 10, 40, 100, 220);
+	mchns <int> l6((char*)"С/Х машина", (char*)"зеленый", 15, 50, 100, 220);
 	mchns <int> l7(l5);
 	mchns <int> l8;
 
@@ -161,6 +271,12 @@ int main()
 
 	l5.print();
 	l6.print();
+	List <int> list_data;
+	list_data.Add(l5);
+	list_data.Add(l6);
+	list_data.Show();
+	list_data.sort();
+	list_data.Show();
 	system("pause");
 	return 0;
 }
